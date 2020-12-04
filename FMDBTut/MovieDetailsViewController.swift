@@ -46,6 +46,17 @@ class MovieDetailsViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     
+        if let id = movieID {
+              DBManager.shared.loadMovie(withID: id, completionHandler: { (movie) in
+                  DispatchQueue.main.async {    // because setValuesToViews will update the UI
+                      if movie != nil {
+                        // the movie object in the completion handler is assigned to the (already declared) movieInfo property, so we can use the fetched values throughout the class.
+                          self.movieInfo = movie
+                          self.setValuesToViews()
+                      }
+                  }
+              })
+          }
     }
     
     
@@ -125,7 +136,8 @@ class MovieDetailsViewController: UIViewController {
     
     
     @IBAction func saveChanges(_ sender: AnyObject) {
-    
+        DBManager.shared.updateMovie(withID: movieInfo.movieID, watched: movieInfo.watched, likes: movieInfo.likes)
+            _ = self.navigationController?.popViewController(animated: true)
     }
     
     

@@ -63,7 +63,8 @@ class MoviesViewController: UIViewController, UITableViewDelegate, UITableViewDa
         // Pass the selected object to the new view controller.
         if let identifier = segue.identifier {
             if identifier == "idSegueMovieDetails" {
-                
+                let movieDetailsViewController = segue.destination as! MovieDetailsViewController
+                movieDetailsViewController.movieID = movies[selectedMovieIndex].movieID
             }
         }
         

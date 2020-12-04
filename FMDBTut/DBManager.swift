@@ -159,9 +159,61 @@ class DBManager: NSObject {
         return movies
     }
     
+    // you can use completion handlers instead of return values when fetching data from the database.
     
-    
-    
+    func loadMovie(withID ID: Int, completionHandler: (_ movieInfo: MovieInfo?) -> Void) {
+        var movieInfo: MovieInfo!
+     
+        if openDatabase() {
+            // this query loads according to ID of the movie
+            let query = "select * from movies where \(field_MovieID)=?"
+     
+            do {
+                let results = try database.executeQuery(query, values: [ID])
+     
+                if results.next() {
+                    movieInfo = MovieInfo(movieID: Int(results.int(forColumn: field_MovieID)),
+                                          title: results.string(forColumn: field_MovieTitle),
+                                          category: results.string(forColumn: field_MovieCategory),
+                                          year: Int(results.int(forColumn: field_MovieYear)),
+                                          movieURL: results.string(forColumn: field_MovieURL),
+                                          coverURL: results.string(forColumn: field_MovieCoverURL),
+                                          watched: results.bool(forColumn: field_MovieWatched),
+                                          likes: Int(results.int(forColumn: field_MovieLikes))
+                    )
+     
+                }
+                else {
+                    print(database.lastError())
+                }
+            }
+            catch {
+                print(error.localizedDescription)
+            }
+     
+            database.close()
+        }
+     
+        completionHandler(movieInfo)
+    }
+     
+    func updateMovie(withID ID: Int, watched: Bool, likes: Int) {
+        if openDatabase() {
+            let query = "update movies set \(field_MovieWatched)=?, \(field_MovieLikes)=? where \(field_MovieID)=?"
+     
+            do {
+                // This method is the one that you have to use to perform any kind of changes to the database create or update
+                // The second parameter of that method is again an array of Any objects that you pass along with the query that will be executed.
+                try database.executeUpdate(query, values: [watched, likes, ID])
+                // we could return a bool value to indicate if db is updated.
+            }
+            catch {
+                print(error.localizedDescription)
+            }
+     
+            database.close()
+        }
+    }
     
     
     
