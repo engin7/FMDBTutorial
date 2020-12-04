@@ -26,13 +26,11 @@ class MoviesViewController: UIViewController, UITableViewDelegate, UITableViewDa
     // MARK: IBOutlet Properties
     @IBOutlet weak var tblMovies: UITableView!
     
-    
     // MARK: Custom Properties
     
     var movies: [MovieInfo]!
     
     var selectedMovieIndex: Int!
-    
     
     // MARK: Initialization
     
@@ -44,13 +42,18 @@ class MoviesViewController: UIViewController, UITableViewDelegate, UITableViewDa
         tblMovies.delegate = self
         tblMovies.dataSource = self
     }
-
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // fill in local array from database and load it with tableview
+        movies = DBManager.shared.loadMovies()
+        tblMovies.reloadData()
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
-
     
     // MARK: - Navigation
 
@@ -66,31 +69,40 @@ class MoviesViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
     }
     
-    
-    
     // MARK: UITableView Methods
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
-    
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return (movies != nil) ? movies.count : 0
     }
     
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        
+     
+        let currentMovie = movies[indexPath.row]
+     
+        cell.textLabel?.text = currentMovie.title
+        cell.imageView?.contentMode = UIViewContentMode.scaleAspectFit
+     
+        (URLSession(configuration: URLSessionConfiguration.default)).dataTask(with: URL(string: currentMovie.coverURL)!, completionHandler: { (imageData, response, error) in
+            if let data = imageData {
+                // asynchronously download each movie image
+                DispatchQueue.main.async {
+                    cell.imageView?.image = UIImage(data: data)
+                    cell.layoutSubviews()
+                }
+            }
+        }).resume()
+     
         return cell
     }
-    
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 100.0
     }
-    
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         selectedMovieIndex = indexPath.row

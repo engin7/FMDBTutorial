@@ -121,4 +121,59 @@ class DBManager: NSObject {
         }
     }
     
+    func loadMovies() -> [MovieInfo]! {
+        var movies: [MovieInfo]!
+        
+        if openDatabase() {
+            // create the SQL query that tells the database which data to load:
+            let query = "select * from movies order by \(field_MovieYear) asc"
+            // we’re just asking from FMDB to fetch all the movies ordered in an ascending order based on the release year.
+            do {
+                print(database)
+                let results = try database.executeQuery(query, values: nil)
+                // The results.next() method should be always called.for single methods call if statement instead of while
+                while results.next() {
+                    let movie = MovieInfo(movieID: Int(results.int(forColumn: field_MovieID)),
+                                          title: results.string(forColumn: field_MovieTitle),
+                                          category: results.string(forColumn: field_MovieCategory),
+                                          year: Int(results.int(forColumn: field_MovieYear)),
+                                          movieURL: results.string(forColumn: field_MovieURL),
+                                          coverURL: results.string(forColumn: field_MovieCoverURL),
+                                          watched: results.bool(forColumn: field_MovieWatched),
+                                          likes: Int(results.int(forColumn: field_MovieLikes))
+                    )
+                 
+                    if movies == nil {
+                        movies = [MovieInfo]()
+                    }
+                 
+                    movies.append(movie)
+                }
+            }
+            catch {
+                print(error.localizedDescription)
+            }
+            database.close()
+        }
+     
+        return movies
+    }
+    
+    
+    
+    
+    
+    
+    
+    
 }
+
+// more advanced query:
+// let query = "select * from movies where \(field_MovieCategory)=? order by \(field_MovieYear) desc"
+// let results = try database.executeQuery(query, values: ["Crime"])
+
+// Another example, where we load all the movies data for a specific category and release year greater than the year that we’ll specify, ordered by their ID values in a descending order:
+// let query = "select * from movies where \(field_MovieCategory)=? and \(field_MovieYear)>? order by \(field_MovieID) desc"
+// let results = try database.executeQuery(query, values: ["Crime", 1990])
+
+
