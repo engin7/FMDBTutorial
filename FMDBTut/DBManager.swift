@@ -65,7 +65,7 @@ class DBManager: NSObject {
     
     func openDatabase() -> Bool {
         if database == nil {
-            if !FileManager.default.fileExists(atPath: pathToDatabase) {
+            if FileManager.default.fileExists(atPath: pathToDatabase) {
             database = FMDatabase(path: pathToDatabase!)   //this creates the database if it doesnt exists
             // No connection is being established at that point though. We just know that after that line we can use the database property to have access to our database.
             }
@@ -214,8 +214,26 @@ class DBManager: NSObject {
             database.close()
         }
     }
-    
-    
+     
+    func deleteMovie(withID ID: Int) -> Bool {
+        var deleted = false
+     
+        if openDatabase() {
+            let query = "delete from movies where \(field_MovieID)=?"
+     
+            do {
+                try database.executeUpdate(query, values: [ID])
+                deleted = true
+            }
+            catch {
+                print(error.localizedDescription)
+            }
+     
+            database.close()
+        }
+     
+        return deleted
+    }
     
     
 }
@@ -228,4 +246,5 @@ class DBManager: NSObject {
 // let query = "select * from movies where \(field_MovieCategory)=? and \(field_MovieYear)>? order by \(field_MovieID) desc"
 // let results = try database.executeQuery(query, values: ["Crime", 1990])
 
+// We started the demo app by creating the database programmatically, but that’s not the only way to do it. You can create your database using an SQLite manager and specify the tables and their fields in an easy and graphical way, and then put the database file in your application bundle. However, you’ll have to copy it to the documents directory if you’re planning to make changes through the app into the database.
 

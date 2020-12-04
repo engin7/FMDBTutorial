@@ -110,4 +110,13 @@ class MoviesViewController: UIViewController, UITableViewDelegate, UITableViewDa
         performSegue(withIdentifier: "idSegueMovieDetails", sender: nil)
     }
     
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            if DBManager.shared.deleteMovie(withID: movies[indexPath.row].movieID) {
+                        movies.remove(at: indexPath.row)
+                        tblMovies.reloadData()
+                    }
+        }
+    }
+    
 }
