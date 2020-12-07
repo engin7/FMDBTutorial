@@ -31,10 +31,9 @@ class DBManager: NSObject {
         pathToDatabase = documentsDirectory.appending("/\(databaseFileName)")
     }
     
-    
     func createDatabase() -> Bool {
         var created = false
-        
+        // if no path exists create the db
         if !FileManager.default.fileExists(atPath: pathToDatabase) {
             database = FMDatabase(path: pathToDatabase!)
             
@@ -59,7 +58,6 @@ class DBManager: NSObject {
                 }
             }
         }
-        
         return created
     }
     
